@@ -94,6 +94,23 @@ With a trace ID — `ContextVault(path, trace_id=...)`, or the environment (`CON
 
 These events were validated against agent-trace's own `agenttrace.schema.validate_event` — they ingest into the fleet's trace store unchanged.
 
+## Interlocks
+
+**ContextVault → Factory Floor Agent.** The [factory-floor-agent](https://github.com/hsooligan95/factory-floor-agent)
+uses this store as its optional, off-by-default run-summary backend:
+one vault key per question, each run writing its summary (question,
+plan, groundedness verdict, answer, sources) as a new `artifact`
+version with full provenance — agent `factory-floor-agent`, source
+event = the run's ID — and the next run on the same question reading
+the pinned head version back, provenance included, before it starts.
+The integration lives entirely on the consumer side (its
+`src/context_vault_backend.py`); this repo is unchanged by it, and
+the vault's existing invariants are what make it safe to compose:
+provenance-free writes are rejected here, stale-base writes surface
+as conflicts here. The consumer's `demo_context_vault.py` shows two
+runs — the second in a fresh process — remembering each other through
+the vault.
+
 ## How it works
 
 One SQLite database, two tables. `versions` holds every version of every key (value as JSON, plus kind, agent, timestamp, source event, base version, status, and the value's SHA-256); `heads` holds each key's current head version. A write is: screen → compare `base_version` to the head → insert a new row (status `current`, or `conflicted` if the base was stale) → advance the head only on a clean write. Conflicted versions get real version numbers, so they are addressable and pinnable like any other version. There is no update-in-place anywhere in the code path, and no delete.
