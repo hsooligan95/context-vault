@@ -1,0 +1,3 @@
+# ContextVault has zero runtime dependencies (Python stdlib only: sqlite3).
+# Development / tests:
+#   pip install -e ".[dev]"

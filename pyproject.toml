@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "contextvault"
+version = "0.1.0"
+description = "ContextVault: versioned shared context for multi-agent systems -- every entry carries provenance, nothing is silently overwritten, stale-base writes are flagged as conflicts, and secret/PII patterns are refused at write time."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["contextvault*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
